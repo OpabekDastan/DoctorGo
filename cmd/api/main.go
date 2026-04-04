@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"doctorgo/internal/app"
+	"doctor_go/internal/app"
 )
 
 func main() {

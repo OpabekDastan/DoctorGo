@@ -1,4 +1,4 @@
-package repository
+package postgres
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"doctorgo/internal/model"
+	"doctor_go/internal/model"
 )
 
 type AppointmentRepository struct {

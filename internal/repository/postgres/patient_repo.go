@@ -5,7 +5,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"doctorgo/internal/model"
+	"doctor_go/internal/model"
 )
 
 type PatientRepository struct {

@@ -4,8 +4,8 @@ import (
 	"errors"
 	"time"
 
-	"doctorgo/internal/model"
-	"doctorgo/internal/repository/postgres"
+	"doctor_go/internal/model"
+	"doctor_go/internal/repository/postgres"
 )
 
 type AppointmentService struct {

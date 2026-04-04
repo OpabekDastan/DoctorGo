@@ -1,7 +1,6 @@
-module Doctor_Go
+module doctor_go
 
 go 1.25.0
-
 
 require (
 	github.com/gin-gonic/gin v1.10.0

@@ -3,7 +3,7 @@ package postgres
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	"doctorgo/internal/model"
+	"doctor_go/internal/model"
 )
 
 type DoctorRepository struct {

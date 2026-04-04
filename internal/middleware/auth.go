@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	jwtpkg "doctorgo/pkg/jwt"
+	jwtpkg "doctor_go/pkg/jwt"
 )
 
 func Auth(secret string) gin.HandlerFunc {

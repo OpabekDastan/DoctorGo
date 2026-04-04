@@ -21,7 +21,7 @@ Content-Type: application/json
 
 ### me
 GET http://localhost:8080/api/me
-Authorization: Bearer 
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxLCJyb2xlIjoiQURNSU4iLCJlbWFpbCI6ImFkbWluQGNsaW5pYy5sb2NhbCIsImV4cCI6MTc3NTMyOTUzNywiaWF0IjoxNzc1MzIyMzM3fQ.yf45oU1Lv5NXGZEPU0BCaumUZ7XyYzXQwNwaCFek1bc
 ### create patient (admin)
 POST http://localhost:8080/api/admin/patients
 Authorization: Bearer 

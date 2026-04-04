@@ -6,12 +6,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"doctorgo/internal/config"
-	"doctorgo/internal/handler"
-	"doctorgo/internal/middleware"
-	"doctorgo/internal/model"
-	"doctorgo/internal/repository/postgres"
-	"doctorgo/internal/service"
+	"doctor_go/internal/config"
+	"doctor_go/internal/handler"
+	"doctor_go/internal/middleware"
+	"doctor_go/internal/model"
+	"doctor_go/internal/repository/postgres"
+	"doctor_go/internal/service"
 )
 
 func Run() error {

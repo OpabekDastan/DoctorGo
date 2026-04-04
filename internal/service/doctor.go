@@ -4,8 +4,8 @@ import (
 	"errors"
 	"strings"
 	"golang.org/x/crypto/bcrypt"
-	"doctorgo/internal/model"
-	"doctorgo/internal/repository/postgres"
+	"doctor_go/internal/model"
+	"doctor_go/internal/repository/postgres"
 )
 
 type DoctorService struct {

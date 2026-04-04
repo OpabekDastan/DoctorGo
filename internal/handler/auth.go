@@ -6,7 +6,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"doctorgo/internal/service"
+	"doctor_go/internal/service"
 )
 
 type AuthHandler struct {

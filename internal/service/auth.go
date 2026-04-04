@@ -9,9 +9,9 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 
-	"doctorgo/internal/model"
-	"doctorgo/internal/repository/postgres"
-	jwtpkg "doctorgo/pkg/jwt"
+	"doctor_go/internal/model"
+	"doctor_go/internal/repository/postgres"
+	jwtpkg "doctor_go/pkg/jwt"
 )
 
 var (
