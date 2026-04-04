@@ -1,0 +1,70 @@
+### health
+GET   http://localhost:8080/health
+
+### login as admin
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@clinic.local",
+  "password": "Admin123!"
+}
+
+### login as doctor
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "doctor1@clinic.local",
+  "password": "Doctor123!"
+}
+
+### me
+GET http://localhost:8080/api/me
+Authorization: Bearer 
+### create patient (admin)
+POST http://localhost:8080/api/admin/patients
+Authorization: Bearer 
+Content-Type: application/json
+
+{
+  "first_name": "Dana",
+  "last_name": "Akhmetova",
+  "gender": "F",
+  "phone": "+77077777777",
+  "email": "dana@mail.local",
+  "address": "Almaty",
+  "comment": "new patient"
+}
+
+### list doctors (admin)
+GET http://localhost:8080/api/admin/doctors
+Authorization: Bearer 
+
+### create appointment (admin)
+POST http://localhost:8080/api/admin/appointments
+Authorization: Bearer 
+Content-Type: application/json
+
+{
+  "patient_id": 1,
+  "doctor_id": 2,
+  "start_at": "2026-04-06T09:00:00Z",
+  "end_at": "2026-04-06T09:30:00Z",
+  "status": "SCHEDULED",
+  "reason": "First consultation",
+  "comment": "checkpoint demo"
+}
+
+### list doctor schedules
+GET http://localhost:8080/api/doctor/schedules
+Authorization: Bearer 
+
+### doctor set appointment status
+PATCH http://localhost:8080/api/doctor/appointments/1/status
+Authorization: Bearer 
+Content-Type: application/json
+
+{
+  "status": "CONFIRMED"
+}
