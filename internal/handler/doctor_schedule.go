@@ -3,22 +3,21 @@ package handler
 import (
 	"net/http"
 	"strconv"
-
 	"github.com/gin-gonic/gin"
-
 	"doctor_go/internal/service"
 )
 
-type AdminPatientHandler struct {
-	service *service.PatientService
+type DoctorScheduleHandler struct {
+	service *service.ScheduleService
 }
 
-func NewAdminPatientHandler(s *service.PatientService) *AdminPatientHandler {
-	return &AdminPatientHandler{service: s}
+func NewDoctorScheduleHandler(s *service.ScheduleService) *DoctorScheduleHandler {
+	return &DoctorScheduleHandler{service: s}
 }
 
-func (h *AdminPatientHandler) List(c *gin.Context) {
-	items, err := h.service.List()
+func (h *DoctorScheduleHandler) List(c *gin.Context) {
+	doctorID := c.GetInt64("user_id")
+	items, err := h.service.List(doctorID)
 	if err != nil {
 		fail(c, http.StatusInternalServerError, err.Error())
 		return
@@ -26,9 +25,10 @@ func (h *AdminPatientHandler) List(c *gin.Context) {
 	success(c, http.StatusOK, items)
 }
 
-func (h *AdminPatientHandler) Get(c *gin.Context) {
+func (h *DoctorScheduleHandler) Get(c *gin.Context) {
+	doctorID := c.GetInt64("user_id")
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	item, err := h.service.Get(id)
+	item, err := h.service.Get(id, doctorID)
 	if err != nil {
 		fail(c, http.StatusNotFound, err.Error())
 		return
@@ -36,13 +36,14 @@ func (h *AdminPatientHandler) Get(c *gin.Context) {
 	success(c, http.StatusOK, item)
 }
 
-func (h *AdminPatientHandler) Create(c *gin.Context) {
-	var input service.UpsertPatientInput
+func (h *DoctorScheduleHandler) Create(c *gin.Context) {
+	doctorID := c.GetInt64("user_id")
+	var input service.UpsertScheduleInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		fail(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	item, err := h.service.Create(input)
+	item, err := h.service.Create(doctorID, input)
 	if err != nil {
 		fail(c, http.StatusBadRequest, err.Error())
 		return
@@ -50,14 +51,15 @@ func (h *AdminPatientHandler) Create(c *gin.Context) {
 	success(c, http.StatusCreated, item)
 }
 
-func (h *AdminPatientHandler) Update(c *gin.Context) {
+func (h *DoctorScheduleHandler) Update(c *gin.Context) {
+	doctorID := c.GetInt64("user_id")
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	var input service.UpsertPatientInput
+	var input service.UpsertScheduleInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		fail(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	item, err := h.service.Update(id, input)
+	item, err := h.service.Update(id, doctorID, input)
 	if err != nil {
 		fail(c, http.StatusBadRequest, err.Error())
 		return
@@ -65,9 +67,10 @@ func (h *AdminPatientHandler) Update(c *gin.Context) {
 	success(c, http.StatusOK, item)
 }
 
-func (h *AdminPatientHandler) Delete(c *gin.Context) {
+func (h *DoctorScheduleHandler) Delete(c *gin.Context) {
+	doctorID := c.GetInt64("user_id")
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err := h.service.Delete(id); err != nil {
+	if err := h.service.Delete(id, doctorID); err != nil {
 		fail(c, http.StatusNotFound, err.Error())
 		return
 	}

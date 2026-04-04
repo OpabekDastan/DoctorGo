@@ -3,21 +3,19 @@ package handler
 import (
 	"net/http"
 	"strconv"
-
 	"github.com/gin-gonic/gin"
-
 	"doctor_go/internal/service"
 )
 
-type AdminPatientHandler struct {
-	service *service.PatientService
+type AdminDoctorHandler struct {
+	service *service.DoctorService
 }
 
-func NewAdminPatientHandler(s *service.PatientService) *AdminPatientHandler {
-	return &AdminPatientHandler{service: s}
+func NewAdminDoctorHandler(s *service.DoctorService) *AdminDoctorHandler {
+	return &AdminDoctorHandler{service: s}
 }
 
-func (h *AdminPatientHandler) List(c *gin.Context) {
+func (h *AdminDoctorHandler) List(c *gin.Context) {
 	items, err := h.service.List()
 	if err != nil {
 		fail(c, http.StatusInternalServerError, err.Error())
@@ -26,7 +24,7 @@ func (h *AdminPatientHandler) List(c *gin.Context) {
 	success(c, http.StatusOK, items)
 }
 
-func (h *AdminPatientHandler) Get(c *gin.Context) {
+func (h *AdminDoctorHandler) Get(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	item, err := h.service.Get(id)
 	if err != nil {
@@ -36,8 +34,8 @@ func (h *AdminPatientHandler) Get(c *gin.Context) {
 	success(c, http.StatusOK, item)
 }
 
-func (h *AdminPatientHandler) Create(c *gin.Context) {
-	var input service.UpsertPatientInput
+func (h *AdminDoctorHandler) Create(c *gin.Context) {
+	var input service.CreateDoctorInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		fail(c, http.StatusBadRequest, err.Error())
 		return
@@ -50,9 +48,9 @@ func (h *AdminPatientHandler) Create(c *gin.Context) {
 	success(c, http.StatusCreated, item)
 }
 
-func (h *AdminPatientHandler) Update(c *gin.Context) {
+func (h *AdminDoctorHandler) Update(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	var input service.UpsertPatientInput
+	var input service.UpdateDoctorInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		fail(c, http.StatusBadRequest, err.Error())
 		return
@@ -65,7 +63,7 @@ func (h *AdminPatientHandler) Update(c *gin.Context) {
 	success(c, http.StatusOK, item)
 }
 
-func (h *AdminPatientHandler) Delete(c *gin.Context) {
+func (h *AdminDoctorHandler) Delete(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err := h.service.Delete(id); err != nil {
 		fail(c, http.StatusNotFound, err.Error())

@@ -9,16 +9,16 @@ import (
 	"doctor_go/internal/service"
 )
 
-type AdminPatientHandler struct {
-	service *service.PatientService
+type AdminAppointmentHandler struct {
+	service *service.AppointmentService
 }
 
-func NewAdminPatientHandler(s *service.PatientService) *AdminPatientHandler {
-	return &AdminPatientHandler{service: s}
+func NewAdminAppointmentHandler(s *service.AppointmentService) *AdminAppointmentHandler {
+	return &AdminAppointmentHandler{service: s}
 }
 
-func (h *AdminPatientHandler) List(c *gin.Context) {
-	items, err := h.service.List()
+func (h *AdminAppointmentHandler) List(c *gin.Context) {
+	items, err := h.service.ListAdmin()
 	if err != nil {
 		fail(c, http.StatusInternalServerError, err.Error())
 		return
@@ -26,9 +26,9 @@ func (h *AdminPatientHandler) List(c *gin.Context) {
 	success(c, http.StatusOK, items)
 }
 
-func (h *AdminPatientHandler) Get(c *gin.Context) {
+func (h *AdminAppointmentHandler) Get(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	item, err := h.service.Get(id)
+	item, err := h.service.GetAdmin(id)
 	if err != nil {
 		fail(c, http.StatusNotFound, err.Error())
 		return
@@ -36,13 +36,14 @@ func (h *AdminPatientHandler) Get(c *gin.Context) {
 	success(c, http.StatusOK, item)
 }
 
-func (h *AdminPatientHandler) Create(c *gin.Context) {
-	var input service.UpsertPatientInput
+func (h *AdminAppointmentHandler) Create(c *gin.Context) {
+	var input service.UpsertAppointmentInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		fail(c, http.StatusBadRequest, err.Error())
 		return
 	}
-	item, err := h.service.Create(input)
+	createdBy := c.GetInt64("user_id")
+	item, err := h.service.Create(createdBy, input)
 	if err != nil {
 		fail(c, http.StatusBadRequest, err.Error())
 		return
@@ -50,9 +51,9 @@ func (h *AdminPatientHandler) Create(c *gin.Context) {
 	success(c, http.StatusCreated, item)
 }
 
-func (h *AdminPatientHandler) Update(c *gin.Context) {
+func (h *AdminAppointmentHandler) Update(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
-	var input service.UpsertPatientInput
+	var input service.UpsertAppointmentInput
 	if err := c.ShouldBindJSON(&input); err != nil {
 		fail(c, http.StatusBadRequest, err.Error())
 		return
@@ -65,7 +66,7 @@ func (h *AdminPatientHandler) Update(c *gin.Context) {
 	success(c, http.StatusOK, item)
 }
 
-func (h *AdminPatientHandler) Delete(c *gin.Context) {
+func (h *AdminAppointmentHandler) Delete(c *gin.Context) {
 	id, _ := strconv.ParseInt(c.Param("id"), 10, 64)
 	if err := h.service.Delete(id); err != nil {
 		fail(c, http.StatusNotFound, err.Error())
