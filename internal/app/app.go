@@ -1,8 +1,12 @@
 package app
 
 import (
+	"context"
 	"fmt"
 	"log"
+	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gin-gonic/gin"
 
@@ -12,6 +16,7 @@ import (
 	"doctor_go/internal/model"
 	"doctor_go/internal/repository/postgres"
 	"doctor_go/internal/service"
+	"doctor_go/internal/worker"
 )
 
 func Run() error {
@@ -33,26 +38,49 @@ func Run() error {
 	gin.SetMode(gin.ReleaseMode)
 	r := gin.Default()
 
-	authRepo := postgres.NewAuthRepository(db)
-	doctorRepo := postgres.NewDoctorRepository(db)
-	patientRepo := postgres.NewPatientRepository(db)
-	scheduleRepo := postgres.NewScheduleRepository(db)
+	// --- Repositories ---
+	authRepo        := postgres.NewAuthRepository(db)
+	doctorRepo      := postgres.NewDoctorRepository(db)
+	patientRepo     := postgres.NewPatientRepository(db)
+	scheduleRepo    := postgres.NewScheduleRepository(db)
 	appointmentRepo := postgres.NewAppointmentRepository(db)
+	dashboardRepo   := postgres.NewDashboardRepository(db)
+	notifRepo       := postgres.NewNotificationRepository(db)
 
-	authService := service.NewAuthService(authRepo, cfg.JWTSecret, cfg.AccessTokenTTLMin)
-	doctorService := service.NewDoctorService(doctorRepo)
-	patientService := service.NewPatientService(patientRepo)
-	scheduleService := service.NewScheduleService(scheduleRepo)
+	// --- Services ---
+	authService        := service.NewAuthService(authRepo, cfg.JWTSecret, cfg.AccessTokenTTLMin)
+	doctorService      := service.NewDoctorService(doctorRepo)
+	patientService     := service.NewPatientService(patientRepo)
+	scheduleService    := service.NewScheduleService(scheduleRepo)
 	appointmentService := service.NewAppointmentService(appointmentRepo)
+	dashboardService   := service.NewDashboardService(dashboardRepo)
 
-	healthHandler := handler.NewHealthHandler()
-	authHandler := handler.NewAuthHandler(authService)
-	adminDoctorHandler := handler.NewAdminDoctorHandler(doctorService)
-	adminPatientHandler := handler.NewAdminPatientHandler(patientService)
+	// --- Background Worker ---
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	reminderWorker := worker.NewReminderWorker(appointmentService, notifRepo)
+	reminderWorker.Start(ctx)
+
+	// Graceful shutdown: отменяем ctx при SIGTERM / SIGINT
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		<-quit
+		log.Println("Shutting down...")
+		cancel()
+	}()
+
+	// --- Handlers ---
+	healthHandler           := handler.NewHealthHandler()
+	authHandler             := handler.NewAuthHandler(authService)
+	adminDoctorHandler      := handler.NewAdminDoctorHandler(doctorService)
+	adminPatientHandler     := handler.NewAdminPatientHandler(patientService)
 	adminAppointmentHandler := handler.NewAdminAppointmentHandler(appointmentService)
-	doctorScheduleHandler := handler.NewDoctorScheduleHandler(scheduleService)
+	adminDashboardHandler   := handler.NewAdminDashboardHandler(dashboardService)
+	doctorScheduleHandler   := handler.NewDoctorScheduleHandler(scheduleService)
 	doctorAppointmentHandler := handler.NewDoctorAppointmentHandler(appointmentService)
 
+	// --- Routes ---
 	r.GET("/health", healthHandler.Health)
 
 	api := r.Group("/api")
@@ -67,18 +95,24 @@ func Run() error {
 			adminGroup := authGroup.Group("/admin")
 			adminGroup.Use(middleware.RequireRole(model.RoleAdmin))
 			{
+				// Dashboard
+				adminGroup.GET("/dashboard", adminDashboardHandler.GetStats)
+
+				// Doctors
 				adminGroup.GET("/doctors", adminDoctorHandler.List)
 				adminGroup.POST("/doctors", adminDoctorHandler.Create)
 				adminGroup.GET("/doctors/:id", adminDoctorHandler.Get)
 				adminGroup.PUT("/doctors/:id", adminDoctorHandler.Update)
 				adminGroup.DELETE("/doctors/:id", adminDoctorHandler.Delete)
 
+				// Patients
 				adminGroup.GET("/patients", adminPatientHandler.List)
 				adminGroup.POST("/patients", adminPatientHandler.Create)
 				adminGroup.GET("/patients/:id", adminPatientHandler.Get)
 				adminGroup.PUT("/patients/:id", adminPatientHandler.Update)
 				adminGroup.DELETE("/patients/:id", adminPatientHandler.Delete)
 
+				// Appointments
 				adminGroup.GET("/appointments", adminAppointmentHandler.List)
 				adminGroup.POST("/appointments", adminAppointmentHandler.Create)
 				adminGroup.GET("/appointments/:id", adminAppointmentHandler.Get)
