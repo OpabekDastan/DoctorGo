@@ -1,0 +1,148 @@
+### ==========================================
+### БАЗОВЫЕ ПРОВЕРКИ
+### ==========================================
+
+### Проверка статуса сервера
+GET http://localhost:8080/health
+
+
+### ==========================================
+### БЛОК АДМИНА
+### ==========================================
+
+### 1. Логин под Админом
+# @name loginAdmin
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@clinic.local",
+  "password": "Admin123!"
+}
+
+### СОХРАНЯЕМ ТОКЕН АДМИНА (VS Code сделает это автоматически, если использовать переменную)
+@admin_token = {{loginAdmin.response.body.data.access_token}}
+
+
+### 2. Посмотреть профиль "Обо мне"
+GET http://localhost:8080/api/me
+Authorization: Bearer {{admin_token}}
+
+
+### 3. Дашборд (Статистика клиники)
+GET http://localhost:8080/api/admin/dashboard
+Authorization: Bearer {{admin_token}}
+
+
+### 4. Добавление нового Врача
+POST http://localhost:8080/api/admin/doctors
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "email": "cardio2@clinic.local",
+  "password": "SecurePassword123!",
+  "first_name": "Anna",
+  "last_name": "Smirnova",
+  "specialization": "Cardiologist",
+  "phone": "+77012223344"
+}
+
+
+### 5. Получение списка всех врачей (чтобы скопировать ID нового врача)
+GET http://localhost:8080/api/admin/doctors
+Authorization: Bearer {{admin_token}}
+
+
+### 6. Регистрация нового Пациента
+POST http://localhost:8080/api/admin/patients
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "first_name": "Alikhan",
+  "last_name": "Iskakov",
+  "gender": "M",
+  "phone": "+77081112233",
+  "email": "alikhan@mail.local",
+  "address": "Almaty, Abay ave 14",
+  "comment": "Жалобы на боли в сердце"
+}
+
+
+### 7. Создание записи на прием (Appointment)
+# Замените doctor_id на ID свежесозданного кардиолога
+POST http://localhost:8080/api/admin/appointments
+Authorization: Bearer {{admin_token}}
+Content-Type: application/json
+
+{
+  "patient_id": 3,
+  "doctor_id": 2,
+  "start_at": "2026-04-24T10:00:00Z",
+  "end_at": "2026-04-24T10:30:00Z",
+  "status": "SCHEDULED",
+  "reason": "Первичный осмотр",
+  "comment": "Создано админом"
+}
+
+
+### ==========================================
+### БЛОК ДОКТОРА
+### ==========================================
+
+### 8. Логин под Доктором (Используем дефолтного доктора из сидов)
+# @name loginDoctor
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "doctor1@clinic.local",
+  "password": "Doctor123!"
+}
+
+### СОХРАНЯЕМ ТОКЕН ДОКТОРА
+@doc_token = {{loginDoctor.response.body.data.access_token}}
+
+
+### 9. Настройка расписания доктором (Создаем смену на Пятницу - 5 день)
+POST http://localhost:8080/api/doctor/schedules
+Authorization: Bearer {{doc_token}}
+Content-Type: application/json
+
+{
+  "weekday": 5,
+  "start_time": "09:00",
+  "end_time": "18:00",
+  "slot_minutes": 30
+}
+
+
+### 10. Просмотр своего расписания
+GET http://localhost:8080/api/doctor/schedules
+Authorization: Bearer {{doc_token}}
+
+
+### 11. Просмотр своих записей на прием (Appointments)
+GET http://localhost:8080/api/doctor/appointments
+Authorization: Bearer {{doc_token}}
+
+
+### 12. Изменение статуса записи (Доктор подтверждает прием)
+# Замените '1' в URL на актуальный ID appointment'а
+PATCH http://localhost:8080/api/doctor/appointments/2/status
+Authorization: Bearer {{doc_token}}
+Content-Type: application/json
+
+{
+  "status": "CONFIRMED"
+}
+
+### 13. Завершение приема доктором
+PATCH http://localhost:8080/api/doctor/appointments/2/status
+Authorization: Bearer {{doc_token}}
+Content-Type: application/json
+
+{
+  "status": "COMPLETED"
+}
